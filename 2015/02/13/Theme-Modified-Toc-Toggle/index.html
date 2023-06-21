@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="alternate" href="/atom.xml" title="Aaron's blogs" type="application/atom+xml">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '7.5.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: '',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="参考Landscape-F   增加文件到主题目录1themes&#x2F;pacman&#x2F;source&#x2F;js&#x2F;toc_aside_toggle.js  修改 bottom-btn.ejsthemes&#x2F;pacman&#x2F;layout&#x2F;_partial&#x2F;bottom-btn.ejs,增加 1234567&lt;% if (is_post()&amp;&amp; (page.toc !&#x3D;&#x3D; false) &amp;&amp;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="主题修改 之 文章目录切换">
+<meta property="og:url" content="http://yoursite.com/2015/02/13/Theme-Modified-Toc-Toggle/index.html">
+<meta property="og:site_name" content="Aaron&#39;s blogs">
+<meta property="og:description" content="参考Landscape-F   增加文件到主题目录1themes&#x2F;pacman&#x2F;source&#x2F;js&#x2F;toc_aside_toggle.js  修改 bottom-btn.ejsthemes&#x2F;pacman&#x2F;layout&#x2F;_partial&#x2F;bottom-btn.ejs,增加 1234567&lt;% if (is_post()&amp;&amp; (page.toc !&#x3D;&#x3D; false) &amp;&amp;">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2015-02-13T07:24:36.000Z">
+<meta property="article:modified_time" content="2023-06-21T07:42:05.720Z">
+<meta property="article:author" content="Aaron.W">
+<meta property="article:tag" content="Hexo">
+<meta property="article:tag" content="Theme">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://yoursite.com/2015/02/13/Theme-Modified-Toc-Toggle/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>主题修改 之 文章目录切换 | Aaron's blogs</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?0fceeeb77be04b77c383d644f4eae41d";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Aaron's blogs</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2015/02/13/Theme-Modified-Toc-Toggle/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/uploads/avatar.png">
+      <meta itemprop="name" content="Aaron.W">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Aaron's blogs">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          主题修改 之 文章目录切换
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2015-02-13 15:24:36" itemprop="dateCreated datePublished" datetime="2015-02-13T15:24:36+08:00">2015-02-13</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2023-06-21 15:42:05" itemprop="dateModified" datetime="2023-06-21T15:42:05+08:00">2023-06-21</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Hexo/" itemprop="url" rel="index">
+                    <span itemprop="name">Hexo</span>
+                  </a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>参考Landscape-F  </p>
+<h2 id="增加文件到主题目录"><a href="#增加文件到主题目录" class="headerlink" title="增加文件到主题目录"></a>增加文件到主题目录</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">themes/pacman/<span class="built_in">source</span>/js/toc_aside_toggle.js</span><br></pre></td></tr></table></figure>
+
+<h2 id="修改-bottom-btn-ejs"><a href="#修改-bottom-btn-ejs" class="headerlink" title="修改 bottom-btn.ejs"></a>修改 bottom-btn.ejs</h2><p>themes/pacman/layout/_partial/bottom-btn.ejs,增加</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&lt;% <span class="keyword">if</span> (is_post()&amp;&amp; (page.toc !== <span class="literal">false</span>) &amp;&amp; theme.toc.aside)&#123; %&gt;</span><br><span class="line">    &lt;a <span class="class"><span class="keyword">class</span></span>=<span class="string">"icon-toc-toggle"</span> href=<span class="string">"javascript:void(0)"</span> title=<span class="string">"文章目录"</span>&gt;<span class="xml"><span class="tag">&lt;/<span class="name">a</span>&gt;</span></span></span><br><span class="line">	&lt;!--</span><br><span class="line">	&lt;script src=<span class="string">"&lt;%- config.root %&gt;js/toc_aside_toggle.js"</span>&gt;<span class="xml"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span></span><br><span class="line">	--&gt;</span><br><span class="line">	&lt;%- js(<span class="string">'js/toc_aside_toggle'</span>) %&gt;</span><br><span class="line">&lt;% &#125; %&gt;</span><br></pre></td></tr></table></figure>
+
+<p>注：此步聚的前提是之前添加过 返回顶部功能。如果没有，请增加 bottom-btn.ejs 和 修改 after-footer.ejs。  </p>
+<h2 id="修改-sidebar-ejs"><a href="#修改-sidebar-ejs" class="headerlink" title="修改 sidebar.ejs"></a>修改 sidebar.ejs</h2><p>themes/pacman/layout/_partial/sidebar.ejs,增加</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;aside id=<span class="string">"sidebar"</span> <span class="class"><span class="keyword">class</span></span>=<span class="string">"clearfix"</span>&gt;</span><br></pre></td></tr></table></figure>
+
+<h2 id="修改-varialbles-styl"><a href="#修改-varialbles-styl" class="headerlink" title="修改 varialbles.styl"></a>修改 varialbles.styl</h2><p>themes/pacman/source/css/_base/varialbles.styl,增加</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sidebar = hexo-config("sidebar")</span><br><span class="line">tocaside = hexo-config("toc.aside")</span><br></pre></td></tr></table></figure>
+
+<h2 id="修改-bottom-btn-styl"><a href="#修改-bottom-btn-styl" class="headerlink" title="修改 bottom-btn.styl"></a>修改 bottom-btn.styl</h2><p>themes/pacman/source/css/bottom-btn.styl,增加</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">if</span> <span class="selector-tag">tocaside</span></span><br><span class="line">  <span class="selector-class">.icon-toc-toggle</span></span><br><span class="line">    <span class="selector-tag">width</span> 36<span class="selector-tag">px</span></span><br><span class="line">    <span class="selector-tag">height</span> 36<span class="selector-tag">px</span></span><br><span class="line">    <span class="selector-tag">cursor</span> <span class="selector-tag">pointer</span></span><br><span class="line">    <span class="selector-tag">border-radius</span> 2<span class="selector-tag">px</span></span><br><span class="line">    <span class="selector-tag">box-shadow</span> 0 1<span class="selector-tag">px</span> 3<span class="selector-tag">px</span> <span class="selector-tag">rgba</span>(0,0,0,<span class="selector-class">.2</span>)</span><br><span class="line">    <span class="selector-tag">text-decoration</span> <span class="selector-tag">none</span></span><br><span class="line">    <span class="selector-tag">background-color</span> <span class="selector-id">#444</span></span><br><span class="line">    <span class="selector-tag">background-color</span> <span class="selector-tag">rgba</span>(0,0,0,0<span class="selector-class">.7</span>)</span><br><span class="line">    <span class="selector-tag">color</span> <span class="selector-id">#fff</span></span><br><span class="line">    <span class="selector-tag">line-height</span> 36<span class="selector-tag">px</span></span><br><span class="line">    <span class="selector-tag">font-size</span> 22<span class="selector-tag">px</span></span><br><span class="line">    <span class="selector-tag">text-align</span> <span class="selector-tag">center</span></span><br><span class="line">    <span class="selector-tag">display</span> <span class="selector-tag">inline-block</span></span><br><span class="line">    <span class="selector-tag">font-family</span> <span class="selector-tag">FontAwesome</span></span><br><span class="line">    <span class="selector-tag">font-style</span> <span class="selector-tag">normal</span></span><br><span class="line">    <span class="selector-tag">font-weight</span> <span class="selector-tag">normal</span></span><br><span class="line">    <span class="selector-tag">-webkit-font-smoothing</span> <span class="selector-tag">antialiased</span></span><br><span class="line">    <span class="selector-tag">-moz-osx-font-smoothing</span> <span class="selector-tag">grayscale</span></span><br><span class="line">  <span class="selector-class">.icon-toc-toggle</span></span><br><span class="line">    &amp;<span class="selector-pseudo">:before</span></span><br><span class="line">      <span class="selector-tag">content</span> "\<span class="selector-tag">f00b</span>"</span><br><span class="line">  <span class="selector-class">.icon-toc-toggle</span></span><br><span class="line">    &amp;<span class="selector-pseudo">:active</span></span><br><span class="line">      <span class="selector-tag">background-color</span> <span class="selector-tag">rgba</span>(0,0,0,<span class="selector-class">.75</span>)</span><br><span class="line">  <span class="selector-class">.icon-toc-toggle</span></span><br><span class="line">    &amp;<span class="selector-pseudo">:hover</span></span><br><span class="line">      <span class="selector-tag">background-color</span> <span class="selector-tag">rgba</span>(211,18,102,<span class="selector-class">.95</span>)</span><br></pre></td></tr></table></figure>
+
+<p>注：此步聚的前提是之前添加过 返回顶部功能。如果没有，请增加 bottom-btn.ejs 和 bottom-btn.styl 并修改 after-footer.ejs将bottom-btn.ejs包含。</p>
+<h2 id="修改-helper-styl"><a href="#修改-helper-styl" class="headerlink" title="修改 helper.styl"></a>修改 helper.styl</h2><p>themes/pacman/source/css/_partial/helper.styl <font color=red>****</font>部分</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-id">#toc</span><span class="selector-class">.toc-aside</span></span><br><span class="line">  <span class="selector-tag">display</span> <span class="selector-tag">none</span></span><br><span class="line">  <span class="selector-tag">width</span> 13%</span><br><span class="line">  <span class="selector-tag">position</span> <span class="selector-tag">fixed</span></span><br><span class="line">  <span class="selector-tag">right</span> 2%</span><br><span class="line">  <span class="selector-tag">top</span> 320<span class="selector-tag">px</span></span><br><span class="line">  **<span class="selector-tag">max-height</span>: 68%**</span><br><span class="line">  **<span class="selector-tag">overflow</span> <span class="selector-tag">auto</span>**</span><br><span class="line">  <span class="selector-tag">line-height</span> 1<span class="selector-class">.5em</span></span><br><span class="line">  <span class="selector-tag">font-size</span> 1<span class="selector-tag">em</span></span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-class">.toc-title</span></span><br><span class="line">  <span class="selector-tag">cursor</span> <span class="selector-tag">pointer</span></span><br><span class="line">  <span class="selector-tag">display</span> <span class="selector-tag">block</span></span><br><span class="line">  <span class="selector-tag">margin</span> <span class="selector-class">.5em</span> 0</span><br></pre></td></tr></table></figure>
+
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Hexo/" rel="tag"># Hexo</a>
+              <a href="/tags/Theme/" rel="tag"># Theme</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+                <a href="/2015/02/13/Theme-Modified-Gotop/" rel="next" title="主题修改 之 返回顶部按扭">
+                  <i class="fa fa-chevron-left"></i> 主题修改 之 返回顶部按扭
+                </a>
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+                <a href="/2015/02/14/Tag-Cloud-Test/" rel="prev" title="标签云测试">
+                  标签云测试 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    
+  <div class="comments" id="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC8zNTU3OC8xMjExNA=="></div>
+  </div>
+  
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#增加文件到主题目录"><span class="nav-number">1.</span> <span class="nav-text">增加文件到主题目录</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#修改-bottom-btn-ejs"><span class="nav-number">2.</span> <span class="nav-text">修改 bottom-btn.ejs</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#修改-sidebar-ejs"><span class="nav-number">3.</span> <span class="nav-text">修改 sidebar.ejs</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#修改-varialbles-styl"><span class="nav-number">4.</span> <span class="nav-text">修改 varialbles.styl</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#修改-bottom-btn-styl"><span class="nav-number">5.</span> <span class="nav-text">修改 bottom-btn.styl</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#修改-helper-styl"><span class="nav-number">6.</span> <span class="nav-text">修改 helper.styl</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <img class="site-author-image" itemprop="image" alt="Aaron.W"
+    src="/uploads/avatar.png">
+  <p class="site-author-name" itemprop="name">Aaron.W</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">6</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="feed-link motion-element">
+    <a href="/atom.xml" rel="alternate">
+      <i class="fa fa-rss"></i>RSS
+    </a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Aaron.W</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v4.2.1
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">主题 – <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> v7.5.0
+  </div>
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<script>
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+</script>
+
+</body>
+</html>

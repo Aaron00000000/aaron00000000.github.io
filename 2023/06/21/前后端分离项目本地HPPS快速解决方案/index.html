@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="alternate" href="/atom.xml" title="Aaron's blogs" type="application/atom+xml">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '7.5.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: '',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="在本地开发中，有时候我们经常需要模拟https环境，比如需要获取GPS定位、摄像头权限等。在传统的解决方案中，我们需要使用自签名证书，然后在http server中使用它。 这些步骤需要一系列繁琐的openssl命令生成，而且需要频繁上传到支持https的服务器环境测试，非常地不方便！！！ 下面介绍一种更加简单友好的方式生成本地https证书，并且信任自签CA的方案——mkcert 安装mkcer">
+<meta property="og:type" content="article">
+<meta property="og:title" content="前后端分离项目本地HPPS快速解决方案">
+<meta property="og:url" content="http://yoursite.com/2023/06/21/%E5%89%8D%E5%90%8E%E7%AB%AF%E5%88%86%E7%A6%BB%E9%A1%B9%E7%9B%AE%E6%9C%AC%E5%9C%B0HPPS%E5%BF%AB%E9%80%9F%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/index.html">
+<meta property="og:site_name" content="Aaron&#39;s blogs">
+<meta property="og:description" content="在本地开发中，有时候我们经常需要模拟https环境，比如需要获取GPS定位、摄像头权限等。在传统的解决方案中，我们需要使用自签名证书，然后在http server中使用它。 这些步骤需要一系列繁琐的openssl命令生成，而且需要频繁上传到支持https的服务器环境测试，非常地不方便！！！ 下面介绍一种更加简单友好的方式生成本地https证书，并且信任自签CA的方案——mkcert 安装mkcer">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-06-21T04:24:43.000Z">
+<meta property="article:modified_time" content="2023-06-21T04:49:52.409Z">
+<meta property="article:author" content="Aaron.W">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://yoursite.com/2023/06/21/%E5%89%8D%E5%90%8E%E7%AB%AF%E5%88%86%E7%A6%BB%E9%A1%B9%E7%9B%AE%E6%9C%AC%E5%9C%B0HPPS%E5%BF%AB%E9%80%9F%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>前后端分离项目本地HPPS快速解决方案 | Aaron's blogs</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?0fceeeb77be04b77c383d644f4eae41d";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Aaron's blogs</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2023/06/21/%E5%89%8D%E5%90%8E%E7%AB%AF%E5%88%86%E7%A6%BB%E9%A1%B9%E7%9B%AE%E6%9C%AC%E5%9C%B0HPPS%E5%BF%AB%E9%80%9F%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/uploads/avatar.png">
+      <meta itemprop="name" content="Aaron.W">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Aaron's blogs">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          前后端分离项目本地HPPS快速解决方案
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2023-06-21 12:24:43 / 修改时间：12:49:52" itemprop="dateCreated datePublished" datetime="2023-06-21T12:24:43+08:00">2023-06-21</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Dev/" itemprop="url" rel="index">
+                    <span itemprop="name">Dev</span>
+                  </a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>在本地开发中，有时候我们经常需要模拟https环境，比如需要获取GPS定位、摄像头权限等。在传统的解决方案中，我们需要使用自签名证书，然后在http server中使用它。</p>
+<p>这些步骤需要一系列繁琐的<code>openssl</code>命令生成，而且需要频繁上传到支持https的服务器环境测试，非常地不方便！！！</p>
+<p>下面介绍一种更加简单友好的方式生成本地https证书，并且信任自签CA的方案——<a href="https://www.npmjs.com/package/mkcert" target="_blank" rel="noopener">mkcert</a></p>
+<h3 id="安装mkcert"><a href="#安装mkcert" class="headerlink" title="安装mkcert"></a>安装mkcert</h3><ul>
+<li>安装命令：<code>npm install -g mkcert</code></li>
+<li>判断是否安装成功，输入命令：<code>mkcert --version</code>，如果能看到版本号，说明安装成功</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">Windows PowerShell</span><br><span class="line">版权所有（C） Microsoft Corporation。保留所有权利。</span><br><span class="line"></span><br><span class="line">安装最新的 PowerShell，了解新功能和改进！https://aka.ms/PSWindows</span><br><span class="line"></span><br><span class="line">PS C:\Users\wangh&gt; npm install -g mkcert</span><br><span class="line"></span><br><span class="line">added 4 packages <span class="keyword">in</span> 812ms</span><br><span class="line">npm notice</span><br><span class="line">npm notice New minor version of npm available! 8.4.1 -&gt; 8.9.0</span><br><span class="line">npm notice Changelog: https://github.com/npm/cli/releases/tag/v8.9.0</span><br><span class="line">npm notice Run npm install -g npm@8.9.0 to update!</span><br><span class="line">npm notice</span><br><span class="line">PS C:\Users\wangh&gt; mkcert --version</span><br><span class="line">1.5.0</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="生成CA相关证书"><a href="#生成CA相关证书" class="headerlink" title="生成CA相关证书"></a>生成CA相关证书</h3><ul>
+<li>新建目录，准备存放证书。如：D:\Users\wangh\Dev\VueCerts</li>
+<li>生成一个<code>ca</code>证书，命令<code>mkcert create-ca</code> </li>
+</ul>
+<p>​    生成之后会看到一个<code>ca.crt</code>和<code>ca.key</code>文件</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">PS D:\&gt; <span class="built_in">cd</span> .\Users\wangh\Dev\VueCerts\</span><br><span class="line">PS D:\Users\wangh\Dev\VueCerts&gt; mkcert create-ca</span><br><span class="line">CA Private Key: D:\Users\wangh\Dev\VueCerts\ca.key</span><br><span class="line">CA Certificate: D:\Users\wangh\Dev\VueCerts\ca.crt</span><br><span class="line">Please keep the private key <span class="keyword">in</span> a secure location.</span><br><span class="line">PS D:\Users\wangh\Dev\VueCerts&gt; dir</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    目录: D:\Users\wangh\Dev\VueCerts</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Mode                 LastWriteTime         Length Name</span><br><span class="line">----                 -------------         ------ ----</span><br><span class="line">-a----          2022/5/7      9:58           1250 ca.crt</span><br><span class="line">-a----          2022/5/7      9:58           1702 ca.key</span><br></pre></td></tr></table></figure>
+
+<p>使用 <strong>mkcert help create-ca</strong> 查看更多命令选项：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">PS D:\Users\wangh\Dev\VueCerts\202306&gt; mkcert <span class="built_in">help</span> create-ca</span><br><span class="line">Usage: cli create-ca [options]</span><br><span class="line"></span><br><span class="line">Options:</span><br><span class="line">  --organization [value]  Organization name (default: <span class="string">"Test CA"</span>)</span><br><span class="line">  --country-code [value]  Country code (default: <span class="string">"US"</span>)</span><br><span class="line">  --state [value]         State name (default: <span class="string">"California"</span>)</span><br><span class="line">  --locality [value]      Locality address (default: <span class="string">"San Francisco"</span>)</span><br><span class="line">  --validity [days]       Validity <span class="keyword">in</span> days (default: <span class="string">"365"</span>)</span><br><span class="line">  --key [file]            Output key (default: <span class="string">"ca.key"</span>)</span><br><span class="line">  --cert [file]           Output certificate (default: <span class="string">"ca.crt"</span>)</span><br><span class="line">  -h, --<span class="built_in">help</span>              display <span class="built_in">help</span> <span class="keyword">for</span> <span class="built_in">command</span></span><br></pre></td></tr></table></figure>
+
+
+
+<ul>
+<li>再生成<code>cert</code>证书，命令<code>mkcert create-cert</code></li>
+</ul>
+<p>​    会生成<code>cert.crt</code>和<code>cert.key</code>文件。可加上 –domains 参数，指定 ip 或 域名</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">PS D:\Users\wangh\Dev\VueCerts&gt; mkcert create-cert --domains <span class="string">"127.0.0.1,localhost,192.168.150.128"</span></span><br><span class="line">Private Key: D:\Users\wangh\Dev\VueCerts\cert.key</span><br><span class="line">Certificate: D:\Users\wangh\Dev\VueCerts\cert.crt</span><br></pre></td></tr></table></figure>
+
+<p>使用 <strong>mkcert help create-cert</strong> 查看更多命令选项：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">PS D:\Users\wangh\Dev\VueCerts&gt; mkcert <span class="built_in">help</span> create-cert</span><br><span class="line">Usage: cli create-cert|create-certificate [options]</span><br><span class="line"></span><br><span class="line">Options:</span><br><span class="line">  --ca-key [file]     CA private key (default: <span class="string">"ca.key"</span>)</span><br><span class="line">  --ca-cert [file]    CA certificate (default: <span class="string">"ca.crt"</span>)</span><br><span class="line">  --validity [days]   Validity <span class="keyword">in</span> days (default: <span class="string">"365"</span>)</span><br><span class="line">  --key [file]        Output key (default: <span class="string">"cert.key"</span>)</span><br><span class="line">  --cert [file]       Output certificate (default: <span class="string">"cert.crt"</span>)</span><br><span class="line">  --domains [values]  Comma separated list of domains/ip addresses (default: <span class="string">"localhost,127.0.0.1"</span>)</span><br><span class="line">  -h, --<span class="built_in">help</span>          display <span class="built_in">help</span> <span class="keyword">for</span> <span class="built_in">command</span></span><br></pre></td></tr></table></figure>
+
+<p>到此，生成证书完成，共有四个文件：<strong>ca.crt、ca.key、cert.crt、cert.key</strong>。</p>
+<h3 id="安装CA根证书"><a href="#安装CA根证书" class="headerlink" title="安装CA根证书"></a>安装CA根证书</h3><p>需要将刚刚生成的<code>ca.crt</code>安装到电脑受信任的根证书中</p>
+<h5 id="windows安装方式"><a href="#windows安装方式" class="headerlink" title="windows安装方式"></a>windows安装方式</h5><ul>
+<li><p>直接双击刚刚生成的<code>ca.crt</code>文件，弹出的界面中选择安装证书；</p>
+</li>
+<li><p>下一步弹窗中，选择“<strong>当前用户</strong>”或“<strong>本地计算机</strong>”均可，选择“<strong>将所有的证书都放入下列存储</strong>”，并且选择为“<strong>受信任的根证书颁发机构</strong>”；</p>
+</li>
+<li><p>后面，一路Next，点击“是”即可，到此证书安装成功。</p>
+</li>
+</ul>
+<p>如果你需要在局域网的其他机器上通过https访问应用，请把 ca.crt 文件复制到目标机器上同上安装即可。</p>
+<h3 id="前端VUE中配置CERT证书"><a href="#前端VUE中配置CERT证书" class="headerlink" title="前端VUE中配置CERT证书"></a>前端VUE中配置CERT证书</h3><p>将生成的<code>cert.crt</code>和<code>cert.key</code>两个拷贝到项目的<code>src/ssl</code>文件夹。文件夹可任意；</p>
+<ul>
+<li><code>vue2</code>在<code>vue.config.js</code>中加入以下配置</li>
+</ul>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> path = <span class="built_in">require</span>(<span class="string">'path'</span>)</span><br><span class="line"><span class="keyword">const</span> fs = <span class="built_in">require</span>(<span class="string">'fs'</span>)</span><br><span class="line"></span><br><span class="line"><span class="built_in">module</span>.exports = &#123;</span><br><span class="line">  devServer: &#123;</span><br><span class="line">    open: <span class="literal">true</span>,</span><br><span class="line">    https: &#123;</span><br><span class="line">      cert: fs.readFileSync(path.join(__dirname, <span class="string">'src/ssl/cert.crt'</span>)),</span><br><span class="line">      key: fs.readFileSync(path.join(__dirname, <span class="string">'src/ssl/cert.key'</span>))</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<ul>
+<li><code>vue3</code>在<code>vite.config.js</code>中加入以下配置</li>
+</ul>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; defineConfig &#125; <span class="keyword">from</span> <span class="string">'vite'</span></span><br><span class="line"><span class="keyword">import</span> vue <span class="keyword">from</span> <span class="string">'@vitejs/plugin-vue'</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> * <span class="keyword">as</span> fs <span class="keyword">from</span> <span class="string">'fs'</span></span><br><span class="line"><span class="keyword">import</span> * <span class="keyword">as</span> path <span class="keyword">from</span> <span class="string">'path'</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// https://vitejs.dev/config/</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> defineConfig(&#123;</span><br><span class="line">  plugins: [vue()],</span><br><span class="line">  resolve: &#123;</span><br><span class="line">    alias: &#123;</span><br><span class="line">      <span class="string">'@'</span>: path.resolve(__dirname, <span class="string">'src'</span>)</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;,</span><br><span class="line">  server: &#123;</span><br><span class="line">    open: <span class="literal">true</span>,</span><br><span class="line">    https: &#123;</span><br><span class="line">      <span class="comment">// 主要是下面两行的配置文件，不要忘记引入 fs 和 path 两个对象</span></span><br><span class="line">      cert: fs.readFileSync(path.resolve(__dirname, <span class="string">'src/ssl/cert.crt'</span>)),</span><br><span class="line">      key: fs.readFileSync(path.resolve(__dirname, <span class="string">'src/ssl/cert.key'</span>))</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="后端Springboot配置"><a href="#后端Springboot配置" class="headerlink" title="后端Springboot配置"></a>后端Springboot配置</h3><p>前端配置了https，如果是前后端分离的项目，后端api接口应用也需要配置https。</p>
+<p>这里，我们不直接配置springboot的ssl。取而代之使用nginx反向代理转发请求。</p>
+<p>nginx的下载安装过程省略。我己安装好 nginx-1.20.2。路径为</p>
+<blockquote>
+<p>D:\tools\nginx-1.20.2\</p>
+</blockquote>
+<h5 id="安放证书文件"><a href="#安放证书文件" class="headerlink" title="安放证书文件"></a>安放证书文件</h5><p>将mkcert生成的证书文件拷贝到目录，目录可任意。我将其放在<strong>D:\tools\nginx-1.20.2\www\ssl</strong>，并将它们改名。改名不是必需的，我这样做，只是为了将来可能存放多个站点的证书文件，以示区分。</p>
+<blockquote>
+<p>D:\tools\nginx-1.20.2\www\ssl</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">PS D:\tools\nginx-1.20.2&gt; tree /f</span><br><span class="line">卷 Data 的文件夹 PATH 列表</span><br><span class="line">卷序列号为 EE2A-87CB</span><br><span class="line">D:.</span><br><span class="line">└─www</span><br><span class="line">    └─ssl</span><br><span class="line">            192.168.150.128.crt</span><br><span class="line">            192.168.150.128.key</span><br></pre></td></tr></table></figure>
+
+
+
+<h5 id="配置反向代理"><a href="#配置反向代理" class="headerlink" title="配置反向代理"></a>配置反向代理</h5><p>我个人的习惯是为每个站点单独配置一个conf文件，便于管理和修改，而不用修改nginx原始的conf配置文件。</p>
+<ul>
+<li>1、新建配置文件存放目录</li>
+</ul>
+<p>在nginx的conf目录下，新建vhost目录，存放所有的站点配置文件。当然目录名称和位置你可任意。</p>
+<blockquote>
+<p>D:\tools\nginx-1.20.2\conf\vhost</p>
+</blockquote>
+<ul>
+<li>2、修改nginx.conf文件</li>
+</ul>
+<p>文件路径如下D:\tools\nginx-1.20.2\conf\nginx.conf。在文件末尾添加内容，仅一行代码：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">include vhost/*.conf;</span><br></pre></td></tr></table></figure>
+
+<p>完整文件如下，这是原始的nginx-1.20.2的配置文件，除了新加的一行，其它未做任何改动：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">#user  nobody;</span></span><br><span class="line">worker_processes  1;</span><br><span class="line"></span><br><span class="line"><span class="comment">#error_log  logs/error.log;</span></span><br><span class="line"><span class="comment">#error_log  logs/error.log  notice;</span></span><br><span class="line"><span class="comment">#error_log  logs/error.log  info;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#pid        logs/nginx.pid;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">events &#123;</span><br><span class="line">    worker_connections  1024;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">http &#123;</span><br><span class="line">    include       mime.types;</span><br><span class="line">    default_type  application/octet-stream;</span><br><span class="line"></span><br><span class="line">    <span class="comment">#log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '</span></span><br><span class="line">    <span class="comment">#                  '$status $body_bytes_sent "$http_referer" '</span></span><br><span class="line">    <span class="comment">#                  '"$http_user_agent" "$http_x_forwarded_for"';</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">#access_log  logs/access.log  main;</span></span><br><span class="line"></span><br><span class="line">    sendfile        on;</span><br><span class="line">    <span class="comment">#tcp_nopush     on;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">#keepalive_timeout  0;</span></span><br><span class="line">    keepalive_timeout  65;</span><br><span class="line"></span><br><span class="line">    <span class="comment">#gzip  on;</span></span><br><span class="line"></span><br><span class="line">    server &#123;</span><br><span class="line">        listen       80;</span><br><span class="line">        server_name  localhost;</span><br><span class="line"></span><br><span class="line">        <span class="comment">#charset koi8-r;</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">#access_log  logs/host.access.log  main;</span></span><br><span class="line"></span><br><span class="line">        location / &#123;</span><br><span class="line">            root   html;</span><br><span class="line">            index  index.html index.htm;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">#error_page  404              /404.html;</span></span><br><span class="line"></span><br><span class="line">        <span class="comment"># redirect server error pages to the static page /50x.html</span></span><br><span class="line">        <span class="comment">#</span></span><br><span class="line">        error_page   500 502 503 504  /50x.html;</span><br><span class="line">        location = /50x.html &#123;</span><br><span class="line">            root   html;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment"># proxy the PHP scripts to Apache listening on 127.0.0.1:80</span></span><br><span class="line">        <span class="comment">#</span></span><br><span class="line">        <span class="comment">#location ~ \.php$ &#123;</span></span><br><span class="line">        <span class="comment">#    proxy_pass   http://127.0.0.1;</span></span><br><span class="line">        <span class="comment">#&#125;</span></span><br><span class="line"></span><br><span class="line">        <span class="comment"># pass the PHP scripts to FastCGI server listening on 127.0.0.1:9000</span></span><br><span class="line">        <span class="comment">#</span></span><br><span class="line">        <span class="comment">#location ~ \.php$ &#123;</span></span><br><span class="line">        <span class="comment">#    root           html;</span></span><br><span class="line">        <span class="comment">#    fastcgi_pass   127.0.0.1:9000;</span></span><br><span class="line">        <span class="comment">#    fastcgi_index  index.php;</span></span><br><span class="line">        <span class="comment">#    fastcgi_param  SCRIPT_FILENAME  /scripts$fastcgi_script_name;</span></span><br><span class="line">        <span class="comment">#    include        fastcgi_params;</span></span><br><span class="line">        <span class="comment">#&#125;</span></span><br><span class="line"></span><br><span class="line">        <span class="comment"># deny access to .htaccess files, if Apache's document root</span></span><br><span class="line">        <span class="comment"># concurs with nginx's one</span></span><br><span class="line">        <span class="comment">#</span></span><br><span class="line">        <span class="comment">#location ~ /\.ht &#123;</span></span><br><span class="line">        <span class="comment">#    deny  all;</span></span><br><span class="line">        <span class="comment">#&#125;</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="comment"># another virtual host using mix of IP-, name-, and port-based configuration</span></span><br><span class="line">    <span class="comment">#</span></span><br><span class="line">    <span class="comment">#server &#123;</span></span><br><span class="line">    <span class="comment">#    listen       8000;</span></span><br><span class="line">    <span class="comment">#    listen       somename:8080;</span></span><br><span class="line">    <span class="comment">#    server_name  somename  alias  another.alias;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">#    location / &#123;</span></span><br><span class="line">    <span class="comment">#        root   html;</span></span><br><span class="line">    <span class="comment">#        index  index.html index.htm;</span></span><br><span class="line">    <span class="comment">#    &#125;</span></span><br><span class="line">    <span class="comment">#&#125;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="comment"># HTTPS server</span></span><br><span class="line">    <span class="comment">#</span></span><br><span class="line">    <span class="comment">#server &#123;</span></span><br><span class="line">    <span class="comment">#    listen       443 ssl;</span></span><br><span class="line">    <span class="comment">#    server_name  localhost;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">#    ssl_certificate      cert.pem;</span></span><br><span class="line">    <span class="comment">#    ssl_certificate_key  cert.key;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">#    ssl_session_cache    shared:SSL:1m;</span></span><br><span class="line">    <span class="comment">#    ssl_session_timeout  5m;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">#    ssl_ciphers  HIGH:!aNULL:!MD5;</span></span><br><span class="line">    <span class="comment">#    ssl_prefer_server_ciphers  on;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">#    location / &#123;</span></span><br><span class="line">    <span class="comment">#        root   html;</span></span><br><span class="line">    <span class="comment">#        index  index.html index.htm;</span></span><br><span class="line">    <span class="comment">#    &#125;</span></span><br><span class="line">    <span class="comment">#&#125;</span></span><br><span class="line">    </span><br><span class="line">	include vhost/*.conf;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<ul>
+<li>3、新建站点配置文件</li>
+</ul>
+<p>在 <strong>D:\tools\nginx-1.20.2\conf\vhost</strong> 目录下新建 <strong>192.168.150.128.conf</strong> 文件，文件名可任意，内容如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"># 名称最好不带下划线。后端Springboot的Tomcat可能会认为带下划线或者数字，不符合规范，报400错误</span><br><span class="line">upstream backend_navi &#123;</span><br><span class="line">	# Springboot运行的主机和端口</span><br><span class="line">    server <span class="number">192.168</span><span class="number">.150</span><span class="number">.128</span>:<span class="number">18080</span> weight=<span class="number">1</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">server &#123; </span><br><span class="line">	listen      <span class="number">443</span> ssl;</span><br><span class="line">    server_name <span class="number">192.168</span><span class="number">.150</span><span class="number">.128</span> <span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span> localhost;</span><br><span class="line"></span><br><span class="line">    # 引用ssl证书(如果放在nginx/conf/ssl下可以用相对路径,其他位置必须用绝对路径)</span><br><span class="line">    ssl_certificate     D:<span class="regexp">/tools/</span>nginx<span class="number">-1.20</span><span class="number">.2</span>/www/ssl/<span class="number">192.168</span><span class="number">.150</span><span class="number">.128</span>.crt; </span><br><span class="line">    ssl_certificate_key D:<span class="regexp">/tools/</span>nginx<span class="number">-1.20</span><span class="number">.2</span>/www/ssl/<span class="number">192.168</span><span class="number">.150</span><span class="number">.128</span>.key; </span><br><span class="line"></span><br><span class="line">    # 协议优化(可选,优化https协议,增强安全性)</span><br><span class="line">	ssl_protocols               TLSv1 TLSv1<span class="number">.1</span> TLSv1<span class="number">.2</span>;</span><br><span class="line">	ssl_ciphers                 ECDHE-RSA-AES128-GCM-SHA256:HIGH:!aNULL:!MD5:!RC4:!DHE;</span><br><span class="line">	ssl_prefer_server_ciphers   on;</span><br><span class="line">	ssl_session_cache           shared:SSL:<span class="number">10</span>m;</span><br><span class="line">	ssl_session_timeout         <span class="number">10</span>m;</span><br><span class="line"></span><br><span class="line">    location / &#123;</span><br><span class="line">        # # 跨域问题</span><br><span class="line">        # add_header Access-Control-Allow-Origin *;</span><br><span class="line">        # add_header Access-Control-Allow-Methods 'GET, POST, OPTIONS';</span><br><span class="line">        # add_header Access-Control-Allow-Headers 'DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization';</span><br><span class="line"></span><br><span class="line">		# client_max_body_size 100M;</span><br><span class="line">        # proxy_pass http://192.168.150.128:18080;</span><br><span class="line">        proxy_pass http:<span class="comment">//backend_navi;</span></span><br><span class="line">        proxy_set_header Host $host;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>测试一下配置文件是否正确：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">D:\tools\nginx-1.20.2&gt;nginx -t</span><br><span class="line">nginx: the configuration file D:\tools\nginx-1.20.2/conf/nginx.conf syntax is ok</span><br><span class="line">nginx: configuration file D:\tools\nginx-1.20.2/conf/nginx.conf <span class="built_in">test</span> is successful</span><br></pre></td></tr></table></figure>
+
+
+
+<p>启动Springboot和nginx测试应用的https配置是否成功。</p>
+<h5 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h5><p>配置反向代理可能会出现 400 错误。后端使用的是Springboot，可能的原因是配置了 upstream，而名称中带有下划线或数字！解决办法：</p>
+<p>方法1、upstream后面的名称中不要使用下划线。</p>
+<p>如上面的backend_navi，可改成如 backendNavi等</p>
+<p>方法2、在location配置部分，增加 proxy_set_header Host $host</p>
+<p>至此，本地https配置全部完成。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+                <a href="/2015/02/14/Tag-Cloud-Test/" rel="next" title="标签云测试">
+                  <i class="fa fa-chevron-left"></i> 标签云测试
+                </a>
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    
+  <div class="comments" id="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC8zNTU3OC8xMjExNA=="></div>
+  </div>
+  
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#安装mkcert"><span class="nav-number">1.</span> <span class="nav-text">安装mkcert</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#生成CA相关证书"><span class="nav-number">2.</span> <span class="nav-text">生成CA相关证书</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#安装CA根证书"><span class="nav-number">3.</span> <span class="nav-text">安装CA根证书</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#windows安装方式"><span class="nav-number">3.0.1.</span> <span class="nav-text">windows安装方式</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#前端VUE中配置CERT证书"><span class="nav-number">4.</span> <span class="nav-text">前端VUE中配置CERT证书</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#后端Springboot配置"><span class="nav-number">5.</span> <span class="nav-text">后端Springboot配置</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#安放证书文件"><span class="nav-number">5.0.1.</span> <span class="nav-text">安放证书文件</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#配置反向代理"><span class="nav-number">5.0.2.</span> <span class="nav-text">配置反向代理</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#注意事项"><span class="nav-number">5.0.3.</span> <span class="nav-text">注意事项</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <img class="site-author-image" itemprop="image" alt="Aaron.W"
+    src="/uploads/avatar.png">
+  <p class="site-author-name" itemprop="name">Aaron.W</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">6</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="feed-link motion-element">
+    <a href="/atom.xml" rel="alternate">
+      <i class="fa fa-rss"></i>RSS
+    </a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Aaron.W</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v4.2.1
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">主题 – <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> v7.5.0
+  </div>
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<script>
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+</script>
+
+</body>
+</html>
