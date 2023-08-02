@@ -15,9 +15,10 @@ body {
 
 .cell {
   display: inline-block;
+  box-sizing: border-box;
   line-height: 7px;
-  width: 6px;
-  height: 6px;
+  width: 7px;
+  height: 7px;
   background-color: #2d2f42;
   border-bottom: solid 1px #0f0e18;
   border-right: solid 1px #0f0e18;
