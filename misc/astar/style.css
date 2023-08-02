@@ -1,0 +1,57 @@
+:root {
+  --bg-color: #0f0e18;
+  --sub-bg-color: #2d2f42;
+  --purple-color: fuchsia;
+  --blue-color: aqua;
+}
+
+body {
+  background: #0f0e18;
+  /* 让整个内容居中 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.cell {
+  display: inline-block;
+  line-height: 7px;
+  width: 6px;
+  height: 6px;
+  background-color: #2d2f42;
+  border-bottom: solid 1px #0f0e18;
+  border-right: solid 1px #0f0e18;
+  vertical-align: bottom;
+  transition: all 400ms ease;
+}
+
+#container {
+  padding-bottom: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  width: 701px;
+}
+
+/* 为了更好看，加入了 button 的样式，可有可无！*/
+button {
+  background: transparent;
+  /* border: none; */
+  color: var(--blue-color);
+  border: 1px solid aqua;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  transition: all 400ms ease;
+}
+
+button:hover {
+  background: var(--blue-color);
+  color: #333;
+}
+
+.purple {
+  color: var(--purple-color);
+}
+
+.blue {
+  color: var(--blue-color);
+}
